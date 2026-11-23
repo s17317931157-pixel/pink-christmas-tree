@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a050c">
+<title>Merry Christmas · 粉色圣诞树</title>
+<style>
+  :root{
+    --pink-100:#fff3f9;
+    --pink-200:#ffd6ea;
+    --pink-300:#ffa9d2;
+    --pink-400:#ff77b6;
+    --pink-500:#ff4f9e;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:#08030a;
+    color:var(--pink-100);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  #scene{position:fixed;inset:0;width:100%;height:100%;display:block;}
+  .vignette{
+    position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(125% 95% at 50% 55%, rgba(0,0,0,0) 42%, rgba(3,1,5,.55) 78%, rgba(3,1,5,.9) 100%);
+  }
+
+  .hero{
+    position:fixed;z-index:3;
+    left:clamp(24px,7vw,110px);
+    top:16vh;
+    max-width:min(36vw,440px);
+    pointer-events:none;
+    animation:rise 1.8s cubic-bezier(.16,.8,.24,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:none;}}
+
+  .eyebrow{
+    margin:0 0 20px;
+    font-size:11px;letter-spacing:.42em;text-transform:uppercase;
+    color:rgba(255,205,230,.6);
+  }
+  .title{
+    margin:0;
+    font-family:Georgia,"Times New Roman","Songti SC",serif;
+    font-weight:400;font-size:clamp(44px,5.2vw,78px);
+    line-height:.96;letter-spacing:-.01em;
+    color:#ffffff;
+    text-shadow:0 0 46px rgba(255,120,190,.4),0 0 2px rgba(255,255,255,.25);
+  }
+  .title em{
+    display:block;font-style:italic;padding-right:.06em;
+    background:linear-gradient(102deg,#ffffff 0%,#ffd5e8 30%,#ff9ccc 62%,#ff5fa8 100%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 28px rgba(255,110,185,.4));
+  }
+  .subtitle{
+    margin:24px 0 30px;
+    font-size:14px;line-height:1.95;letter-spacing:.07em;
+    color:rgba(255,232,244,.82);
+  }
+  .actions{
+    display:flex;gap:12px;flex-wrap:wrap;pointer-events:auto;
+  }
+  .btn{
+    appearance:none;border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.055);
+    color:#ffeaf5;
+    padding:13px 24px;border-radius:999px;
+    font-size:14px;letter-spacing:.08em;font-family:inherit;
+    cursor:pointer;
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s,background .35s;
+  }
+  .btn:hover{transform:translateY(-2px);border-color:rgba(255,160,210,.55);box-shadow:0 12px 40px rgba(255,90,170,.25);background:rgba(255,170,210,.1);}
+  .btn:active{transform:translateY(0) scale(.98);}
+  .btn.primary{
+    border:none;font-weight:600;
+    color:#320a1d;
+    background:linear-gradient(135deg,#ffd4e8,#ff9ccd 55%,#ff6aae);
+    box-shadow:0 14px 34px rgba(255,80,160,.35), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .btn.primary:hover{box-shadow:0 18px 46px rgba(255,80,160,.5);}
+  .btn .dot{display:inline-block;transform:translateY(-1px);margin-right:7px;}
+
+  .stats{
+    margin:22px 0 0;font-size:12px;letter-spacing:.16em;
+    color:rgba(255,205,230,.42);
+  }
+  .stats b{color:rgba(255,190,225,.85);font-weight:500;}
+
+  .hint{
+    position:fixed;z-index:3;
+    left:clamp(24px,7vw,110px);bottom:5.5vh;
+    margin:0;font-size:11.5px;letter-spacing:.14em;
+    color:rgba(255,205,230,.34);
+    pointer-events:none;
+    animation:rise 2.4s .4s cubic-bezier(.16,.8,.24,1) both;
+  }
+
+  .toast{
+    position:fixed;left:50%;bottom:7vh;z-index:30;
+    transform:translate(-50%,18px);
+    padding:13px 26px;border-radius:999px;
+    font-size:13px;letter-spacing:.06em;
+    color:#390b20;
+    background:linear-gradient(135deg,#ffe0ee,#ffaed6 60%,#ff8cc4);
+    box-shadow:0 18px 50px rgba(255,80,160,.42);
+    opacity:0;pointer-events:none;white-space:nowrap;
+    transition:opacity .4s,transform .45s cubic-bezier(.2,.8,.2,1);
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  .modal{
+    position:fixed;inset:0;z-index:40;
+    display:flex;align-items:center;justify-content:center;
+    padding:22px;
+    background:rgba(7,2,10,.6);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    opacity:0;pointer-events:none;transition:opacity .35s;
+  }
+  .modal.open{opacity:1;pointer-events:auto;}
+  .card{
+    position:relative;
+    width:min(440px,100%);
+    padding:30px 28px 26px;border-radius:24px;
+    background:linear-gradient(160deg,rgba(62,20,42,.94),rgba(22,7,18,.97));
+    border:1px solid rgba(255,165,208,.22);
+    box-shadow:0 34px 100px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.08);
+    transform:translateY(16px) scale(.98);
+    transition:transform .45s cubic-bezier(.2,.8,.2,1);
+  }
+  .modal.open .card{transform:none;}
+  .card .eyebrow{margin-bottom:10px;letter-spacing:.34em;}
+  .card h2{margin:0 0 18px;font-size:20px;font-weight:500;letter-spacing:.05em;}
+  textarea{
+    width:100%;min-height:92px;resize:none;
+    padding:14px 16px;border-radius:14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.12);
+    color:var(--pink-100);font-size:14px;line-height:1.7;font-family:inherit;
+    outline:none;transition:.25s;
+  }
+  textarea:focus{border-color:rgba(255,140,200,.6);background:rgba(255,255,255,.075);}
+  textarea::placeholder{color:rgba(255,220,238,.32);}
+  .btn.wide{width:100%;margin-top:14px;justify-content:center;}
+  .wishes{
+    margin-top:18px;display:flex;flex-direction:column;gap:8px;
+    max-height:150px;overflow:auto;
+  }
+  .wish{
+    font-size:13px;line-height:1.6;color:rgba(255,228,241,.8);
+    padding:9px 13px;border-radius:10px;
+    background:rgba(255,150,200,.08);
+    border-left:2px solid rgba(255,140,200,.55);
+    word-break:break-word;
+  }
+  .wishes:empty{display:none;}
+  .close{
+    position:absolute;top:13px;right:16px;
+    background:none;border:none;padding:4px;
+    color:rgba(255,220,238,.45);font-size:22px;line-height:1;
+    cursor:pointer;transition:color .25s;
+  }
+  .close:hover{color:#ffd6ea;}
+
+  @media (max-width:760px){
+    .hero{
+      left:0;right:0;top:calc(6vh + env(safe-area-inset-top));
+      max-width:none;padding:0 24px;text-align:center;
+    }
+    .eyebrow{margin-bottom:14px;letter-spacing:.36em;}
+    .title{font-size:clamp(38px,10.5vw,54px);}
+    .title em{padding-right:0;}
+    .subtitle{margin:14px 0 20px;font-size:12.5px;line-height:1.8;}
+    .actions{justify-content:center;gap:10px;}
+    .btn{padding:12px 20px;font-size:13px;}
+    .stats{margin-top:14px;font-size:11px;}
+    .hint{left:0;right:0;bottom:calc(3vh + env(safe-area-inset-bottom));text-align:center;font-size:10.5px;}
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div class="vignette"></div>
+
+<header class="hero">
+  <p class="eyebrow" id="eyebrow">2026 · CHRISTMAS</p>
+  <h1 class="title">Merry<em>Christmas</em></h1>
+  <p class="subtitle">愿所有心愿，都落在这棵粉色的树上<br>轻轻一点，星光会为你亮起来</p>
+  <div class="actions">
+    <button id="checkinBtn" class="btn primary"><span class="dot">✦</span><span id="checkinLabel">圣诞打卡</span></button>
+    <button id="wishBtn" class="btn">许个愿</button>
+  </div>
+  <p class="stats"><b id="checkCount">0</b> 次点亮 &nbsp;·&nbsp; <b id="wishCount">0</b> 个愿望</p>
+</header>
+
+<p class="hint">移动鼠标 / 轻触屏幕，星光会跟着你</p>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <button class="close" id="closeModal" aria-label="关闭">×</button>
+    <p class="eyebrow">MAKE A WISH</p>
+    <h2>挂一个愿望在树上</h2>
+    <textarea id="wishInput" maxlength="60" placeholder="写下一句小小的愿望…"></textarea>
+    <button id="saveWish" class="btn primary wide">挂上去</button>
+    <div class="wishes" id="wishes"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var cvs = document.getElementById('scene');
+  var ctx = cvs.getContext('2d');
+
+  var W = 0, H = 0, DPR = 1;
+  var tree = { x: 0, topY: 0, baseY: 0, maxR: 0 };
+  var bgGrad = null, auraGrad = null;
+
+  var treePts = [], groundPts = [], stars = [], snow = [], bursts = [];
+  var rot = 0, rotTarget = 0, time = 0;
+  var bloom = true, reflectStep = 2;
+  var last = 0;
+
+  var Store = {
+    get: function (key, fallback) {
+      try {
+        var raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) { return fallback; }
+    },
+    set: function (key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
+  };
+
+  var WISH_KEY = 'xmas_pink_wishes_v1';
+  var CHECK_KEY = 'xmas_pink_checkins_v1';
+  var wishes = Store.get(WISH_KEY, []);
+  var checkins = Store.get(CHECK_KEY, []);
+  if (!Array.isArray(wishes)) wishes = [];
+  if (!Array.isArray(checkins)) checkins = [];
+
+  /* ---------- sprites ---------- */
+
+  function makeGlowSprite(size, stops) {
+    var c = document.createElement('canvas');
+    c.width = c.height = size;
+    var g = c.getContext('2d');
+    var grd = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    for (var i = 0; i < stops.length; i++) {
+      grd.addColorStop(stops[i][0], stops[i][1]);
+    }
+    g.fillStyle = grd;
+    g.fillRect(0, 0, size, size);
+    return c;
+  }
+
+  var sprites = {
+    pink: makeGlowSprite(64, [
+      [0, 'rgba(255,255,255,1)'],
+      [0.14, 'rgba(255,232,244,0.95)'],
+      [0.36, 'rgba(255,158,210,0.5)'],
+      [0.68, 'rgba(255,105,180,0.13)'],
+      [1, 'rgba(255,105,180,0)']
+    ]),
+    rose: makeGlowSprite(64, [
+      [0, 'rgba(255,248,252,1)'],
+      [0.16, 'rgba(255,208,232,0.9)'],
+      [0.46, 'rgba(240,120,180,0.38)'],
+      [0.78, 'rgba(220,80,150,0.1)'],
+      [1, 'rgba(220,80,150,0)']
+    ]),
+    white: makeGlowSprite(64, [
+      [0, 'rgba(255,255,255,1)'],
+      [0.2, 'rgba(255,255,255,0.8)'],
+      [0.5, 'rgba(255,235,245,0.24)'],
+      [1, 'rgba(255,235,245,0)']
+    ]),
+    gold: makeGlowSprite(64, [
+      [0, 'rgba(255,255,255,1)'],
+      [0.18, 'rgba(255,240,214,0.9)'],
+      [0.46, 'rgba(255,198,150,0.34)'],
+      [1, 'rgba(255,190,140,0)']
+    ])
+  };
+
+  function makeStarSprite(size) {
+    var c = document.createElement('canvas');
+    c.width = c.height = size;
+    var g = c.getContext('2d');
+    var half = size / 2;
+    g.translate(half, half);
+    g.globalCompositeOperation = 'lighter';
+
+    var halo = g.createRadialGradient(0, 0, 0, 0, 0, half);
+    halo.addColorStop(0, 'rgba(255,255,255,1)');
+    halo.addColorStop(0.07, 'rgba(255,242,250,0.96)');
+    halo.addColorStop(0.2, 'rgba(255,178,218,0.5)');
+    halo.addColorStop(0.55, 'rgba(255,120,185,0.12)');
+    halo.addColorStop(1, 'rgba(255,110,180,0)');
+    g.fillStyle = halo;
+    g.beginPath();
+    g.arc(0, 0, half, 0, Math.PI * 2);
+    g.fill();
+
+    for (var i = 0; i < 4; i++) {
+      g.save();
+      g.rotate(i * Math.PI / 4);
+      var ray = g.createLinearGradient(-half, 0, half, 0);
+      ray.addColorStop(0, 'rgba(255,255,255,0)');
+      ray.addColorStop(0.34, 'rgba(255,238,248,0.22)');
+      ray.addColorStop(0.5, 'rgba(255,255,255,0.92)');
+      ray.addColorStop(0.66, 'rgba(255,238,248,0.22)');
+      ray.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = ray;
+      var thin = i % 2 === 0 ? 1.7 : 1.0;
+      g.fillRect(-half, -thin / 2, size, thin);
+      g.restore();
+    }
+    return c;
+  }
+
+  var starSprite = makeStarSprite(128);
+
+  /* ---------- layout ---------- */
+
+  function buildBg() {
+    bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#070309');
+    bgGrad.addColorStop(0.5, '#12060f');
+    bgGrad.addColorStop(1, '#08030a');
+
+    var cy = tree.baseY - (tree.baseY - tree.topY) * 0.42;
+    auraGrad = ctx.createRadialGradient(tree.x, cy, 0, tree.x, cy, tree.maxR * 3.6);
+    auraGrad.addColorStop(0, 'rgba(255,95,165,0.13)');
+    auraGrad.addColorStop(0.4, 'rgba(255,70,150,0.055)');
+    auraGrad.addColorStop(1, 'rgba(255,70,150,0)');
+  }
+
+  function buildTree(small) {
+    treePts = [];
+    var N = small ? 1050 : 1950;
+    for (var i = 0; i < N; i++) {
+      var helix = Math.random() < 0.4;
+      var u, ang, radF;
+      if (helix) {
+        u = Math.random();
+        ang = u * Math.PI * 2 * 6.2 + (Math.random() - 0.5) * 0.5;
+        radF = 0.88 + Math.random() * 0.16;
+      } else {
+        u = Math.pow(Math.random(), 0.68);
+        ang = Math.random() * Math.PI * 2;
+        radF = Math.sqrt(Math.random()) * 0.96;
+      }
+      var r = Math.random();
+      var sprite = 'pink';
+      if (r >= 0.46 && r < 0.72) sprite = 'rose';
+      else if (r >= 0.72 && r < 0.93) sprite = 'white';
+      else if (r >= 0.93) sprite = 'gold';
+
+      treePts.push({
+        u: 0.03 + u * 0.97,
+        ang: ang,
+        radF: radF,
+        size: 1.2 + Math.pow(Math.random(), 2.1) * 4.8,
+        sprite: sprite,
+        tw: Math.random() * Math.PI * 2,
+        tws: 0.5 + Math.random() * 2.4,
+        bright: 0.4 + Math.random() * 0.58,
+        sway: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function buildGround() {
+    groundPts = [];
+    var rings = 9;
+    for (var r = 0; r < rings; r++) {
+      var R = tree.maxR * (0.3 + r * 0.25);
+      var n = 44 + r * 10;
+      for (var i = 0; i < n; i++) {
+        groundPts.push({
+          R: R * (0.94 + Math.random() * 0.1),
+          ang: Math.random() * Math.PI * 2,
+          size: 0.8 + Math.random() * 1.9,
+          speed: 0.07 + Math.random() * 0.22,
+          tw: Math.random() * Math.PI * 2,
+          sprite: Math.random() < 0.68 ? 'pink' : 'white'
+        });
+      }
+    }
+  }
+
+  function buildStars() {
+    stars = [];
+    var n = Math.max(70, Math.min(240, Math.round(W * H / 8000)));
+    for (var i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H * 0.96,
+        r: 0.4 + Math.pow(Math.random(), 2) * 1.9,
+        a: 0.16 + Math.random() * 0.62,
+        ph: Math.random() * Math.PI * 2,
+        sp: 0.5 + Math.random() * 2,
+        sprite: Math.random() < 0.72 ? 'white' : 'pink'
+      });
+    }
+  }
+
+  function newSnow(initial) {
+    return {
+      x: Math.random() * W,
+      y: initial ? Math.random() * H : -20,
+      r: 0.7 + Math.random() * 2.0,
+      vy: 9 + Math.random() * 26,
+      vx: -8 + Math.random() * 16,
+      ph: Math.random() * Math.PI * 2,
+      a: 0.14 + Math.random() * 0.5
+    };
+  }
+
+  function buildSnow() {
+    snow = [];
+    var n = Math.max(60, Math.min(150, Math.round(W * H / 11000)));
+    for (var i = 0; i < n; i++) snow.push(newSnow(true));
+  }
+
+  function layout() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    cvs.width = Math.floor(W * DPR);
+    cvs.height = Math.floor(H * DPR);
+    cvs.style.width = W + 'px';
+    cvs.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    var small = W < 760;
+
+    tree.x = W * (small ? 0.5 : 0.635);
+    tree.topY = H * (small ? 0.455 : 0.2);
+    tree.baseY = H * (small ? 0.825 : 0.845);
+    var span = tree.baseY - tree.topY;
+    tree.maxR = small
+      ? Math.min(W * 0.36, span * 0.62, 270)
+      : Math.min(W * 0.235, span * 0.4, 330);
+
+    bloom = !small;
+    reflectStep = small ? 3 : 2;
+
+    buildBg();
+    buildTree(small);
+    buildGround();
+    buildStars();
+    buildSnow();
+  }
+
+  /* ---------- drawing ---------- */
+
+  function drawStars(t) {
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var tw = 0.45 + 0.55 * Math.sin(t * s.sp + s.ph);
+      ctx.globalAlpha = s.a * (0.3 + 0.7 * tw);
+      var r = s.r * (0.85 + 0.4 * tw);
+      ctx.drawImage(sprites[s.sprite], s.x - r, s.y - r, r * 2, r * 2);
+    }
+  }
+
+  function drawBaseGlow(t) {
+    var cx = tree.x, cy = tree.baseY;
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.translate(cx, cy);
+    ctx.scale(1, 0.27);
+    var rr = tree.maxR * (2.2 + 0.06 * Math.sin(t * 0.9));
+    var g = ctx.createRadialGradient(0, 0, 0, 0, 0, rr);
+    g.addColorStop(0, 'rgba(255,210,238,0.22)');
+    g.addColorStop(0.22, 'rgba(255,135,195,0.11)');
+    g.addColorStop(0.58, 'rgba(255,90,165,0.045)');
+    g.addColorStop(1, 'rgba(255,90,165,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, rr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawGround(t) {
+    var cx = tree.x, cy = tree.baseY;
+    for (var i = 0; i < groundPts.length; i++) {
+      var p = groundPts[i];
+      var a = p.ang + t * p.speed;
+      var x = cx + Math.cos(a) * p.R;
+      var y = cy + Math.sin(a) * p.R * 0.17;
+      var front = Math.sin(a) * 0.5 + 0.5;
+      var tw = 0.5 + 0.5 * Math.sin(t * 2 + p.tw);
+      var alpha = (0.06 + 0.5 * front * front) * (0.45 + 0.55 * tw);
+      var s = p.size * (0.7 + 0.6 * front);
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(sprites[p.sprite], x - s, y - s, s * 2, s * 2);
+    }
+  }
+
+  function drawTree(t) {
+    var cx = tree.x, top = tree.topY;
+    var span = tree.baseY - top;
+    var breathe = 1 + Math.sin(t * 0.7) * 0.005;
+    var baseRot = t * 0.24 + rot;
+
+    // reflection on the floor
+    for (var i = 0; i < treePts.length; i += reflectStep) {
+      var p = treePts[i];
+      var u = p.u;
+      var y0 = top + u * span;
+      var coneR = tree.maxR * Math.pow(u, 1.08) * breathe;
+      var a = p.ang + baseRot;
+      var rr = coneR * p.radF;
+      var dz = Math.sin(a) * rr;
+      var dx = Math.cos(a) * rr;
+      var depth = dz / (tree.maxR + 1);
+      var persp = 0.88 + 0.2 * depth;
+      var px = cx + dx * persp;
+      var py = y0 + dz * 0.06;
+      var tw = 0.5 + 0.5 * Math.sin(t * p.tws + p.tw);
+      var size = p.size * persp * (1 + 0.2 * tw) * 1.1;
+      var ry = tree.baseY + (tree.baseY - py) * 0.18;
+      ctx.globalAlpha = p.bright * 0.1 * (0.4 + 0.6 * tw);
+      ctx.drawImage(sprites[p.sprite], px - size, ry - size, size * 2, size * 2);
+    }
+
+    // tree body
+    for (var j = 0; j < treePts.length; j++) {
+      var q = treePts[j];
+      var uu = q.u;
+      var yy = top + uu * span;
+      var cr = tree.maxR * Math.pow(uu, 1.08) * breathe;
+      var aa = q.ang + baseRot;
+      var rrad = cr * q.radF;
+      var dxx = Math.cos(aa) * rrad;
+      var dzz = Math.sin(aa) * rrad;
+      var dep = dzz / (tree.maxR + 1);
+      var pp = 0.88 + 0.2 * dep;
+      var x = cx + dxx * pp;
+      var y = yy + dzz * 0.06 + Math.sin(t * 1.2 + q.sway) * 0.7;
+      var twk = 0.5 + 0.5 * Math.sin(t * q.tws + q.tw);
+      var alpha = q.bright * (0.4 + 0.6 * (dep * 0.5 + 0.5)) * (0.5 + 0.7 * twk);
+      if (alpha > 1) alpha = 1;
+      var sz = q.size * pp * (1 + 0.22 * twk);
+
+      if (bloom && (j & 1) === 0) {
+        ctx.globalAlpha = alpha * 0.15;
+        var b = sz * 3.4;
+        ctx.drawImage(sprites[q.sprite], x - b, y - b, b * 2, b * 2);
+      }
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(sprites[q.sprite], x - sz, y - sz, sz * 2, sz * 2);
+    }
+  }
+
+  function drawWishStars(t) {
+    if (!wishes.length) return;
+    var cx = tree.x, top = tree.topY;
+    var span = tree.baseY - top;
+    var maxShow = Math.min(wishes.length, 14);
+    for (var i = 0; i < maxShow; i++) {
+      var u = 0.16 + ((i * 0.313) % 0.72);
+      var ang = i * 2.399963;
+      var a = ang + t * 0.24 + rot;
+      var rr = tree.maxR * Math.pow(u, 1.08) * 0.92;
+      var dx = Math.cos(a) * rr;
+      var dz = Math.sin(a) * rr;
+      var dep = dz / (tree.maxR + 1);
+      var px = cx + dx * (0.88 + 0.2 * dep);
+      var py = top + u * span + dz * 0.06;
+      var pulse = 0.72 + 0.28 * Math.sin(t * 2.3 + i);
+      var s = 7 + 5 * pulse;
+      ctx.globalAlpha = 0.5 + 0.4 * pulse;
+      ctx.drawImage(starSprite, px - s, py - s, s * 2, s * 2);
+    }
+  }
+
+  function drawTopper(t) {
+    var y = tree.topY - tree.maxR * 0.04;
+    var pulse = 0.82 + 0.18 * Math.sin(t * 2.1);
+    var s = tree.maxR * (W < 760 ? 0.24 : 0.3) * pulse;
+    ctx.globalAlpha = 0.85;
+    ctx.drawImage(starSprite, tree.x - s, y - s, s * 2, s * 2);
+    ctx.globalAlpha = 1;
+    var core = 6 + 3 * pulse;
+    ctx.drawImage(sprites.white, tree.x - core, y - core, core * 2, core * 2);
+  }
+
+  function drawSnow(t) {
+    for (var i = 0; i < snow.length; i++) {
+      var s = snow[i];
+      var tw = 0.5 + 0.5 * Math.sin(t * 1.6 + s.ph);
+      var r = s.r * (0.8 + 0.5 * tw);
+      ctx.globalAlpha = s.a * (0.35 + 0.65 * tw);
+      ctx.drawImage(sprites.white, s.x - r, s.y - r, r * 2, r * 2);
+    }
+  }
+
+  function drawBursts() {
+    for (var i = 0; i < bursts.length; i++) {
+      var b = bursts[i];
+      var k = 1 - b.life / b.max;
+      if (k <= 0) continue;
+      var r = b.size * (0.3 + k * 0.8);
+      ctx.globalAlpha = Math.max(0, k) * 0.9;
+      ctx.drawImage(sprites[b.sprite], b.x - r, b.y - r, r * 2, r * 2);
+    }
+  }
+
+  /* ---------- update ---------- */
+
+  function updateSnow(dt) {
+    for (var i = 0; i < snow.length; i++) {
+      var s = snow[i];
+      s.y += s.vy * dt;
+      s.x += (s.vx + Math.sin(time * 0.8 + s.ph) * 10) * dt;
+      if (s.y > H + 24) { snow[i] = newSnow(false); snow[i].y = -16; }
+      if (s.x < -24) s.x = W + 20;
+      if (s.x > W + 24) s.x = -20;
+    }
+  }
+
+  function updateBursts(dt) {
+    for (var i = bursts.length - 1; i >= 0; i--) {
+      var b = bursts[i];
+      b.life += dt;
+      if (b.life >= b.max) { bursts.splice(i, 1); continue; }
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      b.vx *= (1 - 1.7 * dt);
+      b.vy = b.vy * (1 - 1.7 * dt) + 70 * dt;
+    }
+  }
+
+  function spawnBurst(x, y) {
+    var n = 26;
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * Math.PI * 2;
+      var sp = 40 + Math.random() * 180;
+      bursts.push({
+        x: x, y: y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp - 30,
+        life: 0,
+        max: 0.9 + Math.random() * 0.9,
+        size: 1.6 + Math.random() * 2.8,
+        sprite: Math.random() < 0.55 ? 'pink' : (Math.random() < 0.7 ? 'white' : 'gold')
+      });
+    }
+  }
+
+  function render(t) {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = auraGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    drawStars(t);
+    drawBaseGlow(t);
+    drawTree(t);
+    drawGround(t);
+    drawWishStars(t);
+    drawSnow(t);
+    drawBursts();
+    drawTopper(t);
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function frame(now) {
+    if (!last) last = now;
+    var dt = (now - last) / 1000;
+    last = now;
+    if (dt > 0.05) dt = 0.05;
+    time += dt;
+    rot += (rotTarget - rot) * Math.min(1, dt * 2.2);
+
+    updateSnow(dt);
+    updateBursts(dt);
+    render(time);
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- UI ---------- */
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer = 0;
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('show');
+    }, 2600);
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  function shortToday() {
+    var d = new Date();
+    return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  }
+
+  var checkinBtn = document.getElementById('checkinBtn');
+  var checkinLabel = document.getElementById('checkinLabel');
+  var checkCountEl = document.getElementById('checkCount');
+  var wishCountEl = document.getElementById('wishCount');
+  var modal = document.getElementById('modal');
+  var wishInput = document.getElementById('wishInput');
+  var wishesEl = document.getElementById('wishes');
+
+  function refreshStats() {
+    checkCountEl.textContent = checkins.length;
+    wishCountEl.textContent = wishes.length;
+    var done = checkins.indexOf(todayKey()) !== -1;
+    checkinLabel.textContent = done ? '已打卡 · ' + shortToday() : '圣诞打卡';
+    document.getElementById('eyebrow').textContent = new Date().getFullYear() + ' · CHRISTMAS';
+  }
+
+  function renderWishList() {
+    wishesEl.innerHTML = '';
+    for (var i = 0; i < wishes.length; i++) {
+      var div = document.createElement('div');
+      div.className = 'wish';
+      div.textContent = wishes[i];
+      wishesEl.appendChild(div);
+    }
+  }
+
+  checkinBtn.addEventListener('click', function () {
+    var key = todayKey();
+    if (checkins.indexOf(key) !== -1) {
+      toast('今天已经打过卡啦，明天再来点亮一次 ✦');
+      spawnBurst(tree.x, tree.topY + 60);
+      return;
+    }
+    checkins.push(key);
+    Store.set(CHECK_KEY, checkins);
+    refreshStats();
+    toast('打卡成功 · 第 ' + checkins.length + ' 次点亮这棵树');
+    var burstY = tree.topY + (tree.baseY - tree.topY) * (0.3 + Math.random() * 0.4);
+    spawnBurst(tree.x + (Math.random() - 0.5) * tree.maxR, burstY);
+  });
+
+  function openModal() {
+    modal.classList.add('open');
+    renderWishList();
+    setTimeout(function () { wishInput.focus(); }, 260);
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+  }
+
+  document.getElementById('wishBtn').addEventListener('click', openModal);
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeModal();
+  });
+
+  document.getElementById('saveWish').addEventListener('click', function () {
+    var text = wishInput.value.trim();
+    if (!text) {
+      toast('先写一句愿望吧 ♡');
+      wishInput.focus();
+      return;
+    }
+    wishes.unshift(text);
+    if (wishes.length > 30) wishes.length = 30;
+    Store.set(WISH_KEY, wishes);
+    wishInput.value = '';
+    renderWishList();
+    refreshStats();
+    closeModal();
+    toast('愿望已挂上圣诞树 ♡');
+    var u = 0.2 + Math.random() * 0.55;
+    spawnBurst(tree.x + (Math.random() - 0.5) * tree.maxR * 0.8, tree.topY + (tree.baseY - tree.topY) * u);
+  });
+
+  wishInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      document.getElementById('saveWish').click();
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  window.addEventListener('pointermove', function (e) {
+    rotTarget = (e.clientX / Math.max(1, W) - 0.5) * 1.05;
+  }, { passive: true });
+
+  window.addEventListener('pointerdown', function (e) {
+    if (e.target.closest && e.target.closest('button, textarea, input, a, .card')) return;
+    spawnBurst(e.clientX, e.clientY);
+  }, { passive: true });
+
+  var resizeTimer = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(layout, 160);
+  });
+
+  refreshStats();
+  layout();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
